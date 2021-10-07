@@ -1,5 +1,6 @@
 package com.paviotti.crudapplication
 
+import android.R
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -14,7 +15,12 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemLongClickListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.paviotti.crudapplication.databinding.ActivityMainBinding
+import android.content.DialogInterface
+
+
+
 
 /**
  * Aula do professor Wagner Machado do Amaral
@@ -24,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bancoDados: SQLiteDatabase
     private lateinit var binding: ActivityMainBinding
     private lateinit var arrayIds: ArrayList<Int>
+    private var idSelecionado: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,11 +41,11 @@ class MainActivity : AppCompatActivity() {
             abrirTelaCadastro()
         }
         binding.listViewDados.setOnItemLongClickListener(OnItemLongClickListener { adapterView, view, i, l ->
-            excluir(i)
-            //  confirmaExcluir()
+            idSelecionado = arrayIds.get(i)
+            confirmaExcluir()
             true
         })
-
+        criarBancoDados()
         // inserirDadosTemp()
         listarDados()
     }
@@ -104,13 +111,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun excluir(i: Int) {
+    private fun excluir() {
         try {
             bancoDados =
                 openOrCreateDatabase("crudapp", MODE_PRIVATE, null) //faz a conexão com o banco
             val sql = """DELETE FROM coisa WHERE id=?"""
             val stmt: SQLiteStatement  = bancoDados.compileStatement(sql)
-            stmt.bindLong(1, arrayIds.get(i).toLong()) //bindLong() porque é inteiro e 1 porque só tem um item
+            stmt.bindLong(1, idSelecionado.toLong()) //bindLong() porque é inteiro e 1 porque só tem um item
             stmt.executeUpdateDelete()
             listarDados()
             bancoDados.close()
@@ -120,6 +127,28 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
+    private fun confirmaExcluir(){
+        val msgBox = AlertDialog.Builder(this@MainActivity)
+        msgBox.setTitle("Excluir")
+        msgBox.setIcon(R.drawable.ic_menu_delete)
+        msgBox.setMessage("Você realmente deseja excluir esse registro?")
+        msgBox.setPositiveButton(
+            "Sim"
+        ) { dialogInterface, i ->
+            excluir()
+            listarDados()
+        }
+        msgBox.setNegativeButton(
+            "Não"
+        ) { dialogInterface, i -> }
+        msgBox.show()
+    }
+
+//    fun abrirTelaAlterar() {
+//        val intent = Intent(this, AlterarActivity::class.java)
+//        intent.putExtra("id", idSelecionado)
+//        startActivity(intent)
+//    }
 }
 
 
