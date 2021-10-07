@@ -8,7 +8,10 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteStatement
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Adapter
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemLongClickListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.paviotti.crudapplication.databinding.ActivityMainBinding
@@ -20,6 +23,7 @@ import com.paviotti.crudapplication.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
     private lateinit var bancoDados: SQLiteDatabase
     private lateinit var binding: ActivityMainBinding
+    private lateinit var arrayIds: ArrayList<Int>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,11 +33,16 @@ class MainActivity : AppCompatActivity() {
         binding.btnCadastrar.setOnClickListener {
             abrirTelaCadastro()
         }
+        binding.listViewDados.setOnItemLongClickListener(OnItemLongClickListener { adapterView, view, i, l ->
+            excluir(i)
+            //  confirmaExcluir()
+            true
+        })
 
-        criarBancoDados()
         // inserirDadosTemp()
         listarDados()
     }
+
 
     /** quando os dados retornarem onResume lista os dados de novo*/
     override fun onResume() {
@@ -59,7 +68,9 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("Recycle") //por causa do rawQuery
     private fun listarDados() {
         try {
-            bancoDados = openOrCreateDatabase("crudapp", MODE_PRIVATE, null)
+            arrayIds = ArrayList() //vai ser usado em excluir()
+            bancoDados =
+                openOrCreateDatabase("crudapp", MODE_PRIVATE, null) //faz a conexão com o banco
             val meuCursor: Cursor
             meuCursor = bancoDados.rawQuery("""SELECT id, nome From coisa""", null)
             val linhas = arrayListOf<String>()
@@ -68,6 +79,7 @@ class MainActivity : AppCompatActivity() {
             meuCursor.moveToFirst()
             while (meuCursor != null) {
                 linhas.add(meuCursor.getString(1))
+                arrayIds.add(meuCursor.getInt(0)) //posição zero por conta de ser um array
                 meuCursor.moveToNext()
             }
         } catch (e: Exception) {
@@ -92,7 +104,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun excluir(i: Int) {
+        try {
+            bancoDados =
+                openOrCreateDatabase("crudapp", MODE_PRIVATE, null) //faz a conexão com o banco
+            val sql = """DELETE FROM coisa WHERE id=?"""
+            val stmt: SQLiteStatement  = bancoDados.compileStatement(sql)
+            stmt.bindLong(1, arrayIds.get(i).toLong()) //bindLong() porque é inteiro e 1 porque só tem um item
+            stmt.executeUpdateDelete()
+            listarDados()
+            bancoDados.close()
 
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+
+        }
+    }
 }
 
 
