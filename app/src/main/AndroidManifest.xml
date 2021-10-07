@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CrudApplication">
         <activity
+            android:name=".CadastroActivity" android:parentActivityName=".MainActivity"
+            android:exported="true" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
