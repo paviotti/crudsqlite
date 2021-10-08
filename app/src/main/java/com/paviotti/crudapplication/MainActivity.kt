@@ -18,8 +18,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.paviotti.crudapplication.databinding.ActivityMainBinding
 import android.content.DialogInterface
-
-
+import android.util.Log
 
 
 /**
@@ -37,14 +36,24 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        //vai para a tela cadastrar
         binding.btnCadastrar.setOnClickListener {
             abrirTelaCadastro()
         }
+
+        //exclui o registrto ao dar um click longo
         binding.listViewDados.setOnItemLongClickListener(OnItemLongClickListener { adapterView, view, i, l ->
             idSelecionado = arrayIds.get(i)
             confirmaExcluir()
             true
         })
+
+        //altera o registro ao dar um click simples
+        binding.listViewDados.setOnItemClickListener(AdapterView.OnItemClickListener { adapterView, view, i, l ->
+            idSelecionado =arrayIds.get(i)
+            abrirTelaAlterar()
+        })
+
         criarBancoDados()
         // inserirDadosTemp()
         listarDados()
@@ -144,11 +153,13 @@ class MainActivity : AppCompatActivity() {
         msgBox.show()
     }
 
-//    fun abrirTelaAlterar() {
-//        val intent = Intent(this, AlterarActivity::class.java)
-//        intent.putExtra("id", idSelecionado)
-//        startActivity(intent)
-//    }
+    fun abrirTelaAlterar() {
+        val intent = Intent(this, AlterarActivity::class.java)
+        intent.putExtra("id", idSelecionado)
+
+       // Log.d("idSelec ", "Valor: $idSelecionado")
+        startActivity(intent)
+    }
 }
 
 
